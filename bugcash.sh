@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #Bugcrowd Attack Surface Hosts [Bugcash]
-#V1.0
+#V1.1
 #09032024
-#Denial Disk
+#BY D3N14LD15K
 
 # Function to extract engagements from the Bugcrowd API with error handling
 extract_engagements() {
@@ -69,57 +69,6 @@ touch vdp.tmp
 cat engagements.txt | sort > vdp.tmp; rm engagements.txt; mv vdp.tmp engagements.txt
 
 echo "Extraction complete. All URLs listed in engagements.txt"
-
-## Function to extract engagements from the Bugcrowd API with error handling
-#extract_engagements() {
-#    local page=$1
-#    local cookie=$2
-#
-#    # Set the API URL with the specified page number
-#    local url="https://bugcrowd.com/engagements.json?category=vdp&page=$page&sort_by=promoted&sort_direction=desc"
-#
-#    # Make the request with the session cookie header
-#    local response=$(curl -s -H "Cookie: $cookie" -H "Accept: application/json" "$url")
-#
-#    # Check if the response is in valid JSON format and extract engagements
-#    local engagements=$(echo "$response" | jq '.engagements[]?')
-#    if [ -z "$engagements" ]; then
-#        echo "No more engagements found on page $page. Exiting."
-#        return 1
-#    fi
-#
-#    # Extract and display the brief URLs of engagements
-#    echo "Extracted URLs on page $page:"
-#    echo "$engagements" | jq -r '.briefUrl' | sed 's|^|https://bugcrowd.com|'
-#
-#    # Append the complete URLs of engagements to the output file
-#    echo "$engagements" | jq -r '.briefUrl' | sed 's|^|https://bugcrowd.com|' >> engagements.txt
-#}
-#
-## Ask for the session cookie from the user
-#read -p "Enter the cookie for authentication: " cookie
-#
-## Initialize the page number
-#page=1
-#
-## Create or clear the output file
-#> engagements.txt
-#
-## Loop through pages to extract engagements
-#while true; do
-#    # Extract engagements for the current page
-#    if ! extract_engagements $page "$cookie"; then
-#        break
-#    fi
-#
-#    # Increment the page number for the next request
-#    ((page++))
-#done
-#
-#touch vdp.tmp
-#cat engagements.txt | sort > vdp.tmp; rm engagements.txt; mv vdp.tmp engagements.txt
-#
-#echo "Extraction complete. All URLs listed in engagements.txt"
 
 input_file="engagements.txt"
 
@@ -270,25 +219,15 @@ cat "$input_file"
 # Extract IP addresses and specific IP range entries, saving them to inscope_ips.txt
 grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]+|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|:.*and.*' "$input_file" > "$ips_file"
 
-mv bugcrowd_inscope.txt inscope.txt
-## Clean the input file, preserving valid wildcards and domains, and removing only the defined garbage
-#grep -Ev '([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]+|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|:.*and.*' "$input_file" | \
-#sed -E '
-#  # Remove garbage in parentheses or trailing after a dash directly after a valid domain extension
-#  s/(\.[a-z]{2,})(\([^)]*\)|-[^/]*$)//g;
-#  # Handle the specific pattern like us{x}.five9.com to us*.five9.com
-#  s/us\{[^}]+\}/us*/g
-#' | \
-## Additional cleanup to handle specific patterns
-#sed -E '
-#  # Remove patterns with leading wildcard and invalid patterns
-#  s/^\*\.\-np\.\*\.//g;
-#  s/^\*\./\*/g;
-#  s/\.\*$//g;
-#  # Remove trailing wildcard if not useful
-#  s/\*\/$//g;
-#  # Remove lone wildcards
-#  s/^\*$/g;
-#' > "$cleaned_file"
-#
+mv bugcrowd_inscope.txt inscope.tmp
+
+sed -e 's/(readbelowfordetails)//g' \
+    -e 's/\/\*//g' \
+    -e 's/(dnsservice;dnsrelated)//g' \
+    -e 's/{app-id}//g' \
+    -e 's/\\t//g' \
+    -e 's/\/.*//g' inscope.tmp > pre.txt
+
+sort -u pre.txt > scope.txt
+
 echo "Scan complete."
