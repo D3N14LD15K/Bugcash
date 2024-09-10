@@ -35,9 +35,7 @@ The script requires a session cookie from Bugcrowd for authentication. Choose be
 
 ```Command Syntax
 
-./bugcash.sh -vdp   # To extract Vulnerability Disclosure Programs
-
-./bugcash.sh -bbp   # To extract Bug Bounty Programs
+./bugcash.sh
 
 ```
 
