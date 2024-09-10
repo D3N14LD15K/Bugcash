@@ -1,4 +1,6 @@
-# Bugcrowd Attack Surface Harvester [Bugcash]
+# BUGCrowd Attack Surface Harvester [Bugcash]
+
+![alt text](https://i.imgur.com/rkYbMIn.png)
 
 **Version**: 1.1  
 **Date**: 09/03/2024  
