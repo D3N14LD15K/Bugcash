@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# Bugcrowd Attack Surface Hosts [Bugcash]
-# V1.2
-# 09092024
-# BY D3N14LD15K
+#Bugcrowd Attack Surface Harvester [Bugcash]
+#V1.3
+#09092024
+#BY D3N14LD15K
+
+RED="\033[0;31m"
+RESET="\033[0m"
+LIGHT_GREEN="\033[0;92m"
 
 # Function to extract engagements from the Bugcrowd API with error handling
 extract_engagements() {
@@ -32,52 +36,37 @@ extract_engagements() {
     echo "$engagements" | jq -r '.briefUrl' | sed 's|^|https://bugcrowd.com|' >> engagements.txt
 }
 
-# Function to create a folder based on the engagement URL
-create_engagement_folder() {
-    local url="$1"
-    local folder_name=""
+# Menu for selecting the category
 
-    # Extract folder name from the URL
-    if [[ "$url" =~ /engagements/ ]]; then
-        folder_name=$(echo "$url" | awk -F'/engagements/' '{print $2}' | tr -d '/')
-    else
-        folder_name=$(echo "$url" | awk -F'bugcrowd.com/' '{print $2}' | tr -d '/')
-    fi
+printf "${LIGHT_GREEN} \r\n"
+printf "   ██████╗░██╗░░░██╗░██████╗░░█████╗░░█████╗░░██████╗██╗░░██╗\r\n"
+printf "   ██╔══██╗██║░░░██║██╔════╝░██╔══██╗██╔══██╗██╔════╝██║░░██║\r\n"
+printf "   ██████╦╝██║░░░██║██║░░██╗░██║░░╚═╝███████║╚█████╗░███████║\r\n"
+printf "   ██╔══██╗██║░░░██║██║░░╚██╗██║░░██╗██╔══██║░╚═══██╗██╔══██║\r\n"
+printf "   ██████╦╝╚██████╔╝╚██████╔╝╚█████╔╝██║░░██║██████╔╝██║░░██║\r\n"
+printf "   ╚═════╝░░╚═════╝░░╚═════╝░░╚════╝░╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝\r\n${RESET}"
+printf "   Coded by D3N14LD15K | Red Team 4TW \r\n\r\n"
 
-    # Create the folder if it doesn't exist
-    mkdir -p "$folder_name"
-    echo "[INFO] Created folder: $folder_name"
-    echo "$folder_name"
-}
+printf "Select the type of program to harvest:\r\n\r\n"
+printf "1) Bug Bounty Program (BBP)\r\n"
+printf "2) Vulnerability Disclosure Program (VDP)\r\n\r\n"
 
-# Function to save targets in their respective engagement folders
-save_targets_in_folder() {
-    local targets_file="$1"
-    local folder_name="$2"
+read -p "Enter your choice (1 or 2): " choice
 
-    # Check if the file and folder exist
-    if [ -f "$targets_file" ] && [ -d "$folder_name" ]; then
-        cp "$targets_file" "$folder_name/scope.txt"
-        echo "[INFO] Saved in-scope targets to $folder_name/scope.txt"
-    fi
-}
+# Set the category based on the user's choice
+case $choice in
+    1)
+        category="bug_bounty"
+        ;;
+    2)
+        category="vdp"
+        ;;
+    *)
+        echo "Invalid choice. Please run the script again and select 1 or 2."
+        exit 1
+        ;;
+esac
 
-# Menu for selecting BBP or VDP
-select_category() {
-    echo "Select the type of program to scan:"
-    echo "1. Bug Bounty Programs (BBP)"
-    echo "2. Vulnerability Disclosure Programs (VDP)"
-    read -p "Enter your choice (1 or 2): " choice
-
-    case "$choice" in
-        1) category="bug_bounty";;
-        2) category="vdp";;
-        *) echo "Invalid choice. Exiting."; exit 1;;
-    esac
-}
-
-# Prompt the user to select a category
-select_category
 
 # Ask for the session cookie from the user
 read -p "Enter the cookie for authentication: " cookie
@@ -98,8 +87,7 @@ while true; do
     # Increment the page number for the next request
     ((page++))
 done
-
-# Sorting and cleaning up extracted URLs
+# Sorting and cleaning up extracted URLs (keeping the rest of your script intact)
 touch vdp.tmp
 cat engagements.txt | sort > vdp.tmp; rm engagements.txt; mv vdp.tmp engagements.txt
 
@@ -113,9 +101,6 @@ temp_file="temp_valid_targets.txt"
 
 # Create or clear the output file
 > "$output_file"
-
-# Create _ALL folder to store all targets
-mkdir -p _ALL
 
 # Function to extract targets_url from a response
 extract_targets_url() {
@@ -133,16 +118,14 @@ fetch_valid_targets() {
     local base_url="$1"
     local cookie="$2"
 
-    # Create folder for the engagement
-    local folder_name=$(create_engagement_folder "$base_url")
-
     # Append /target_groups to the URL
     target_groups_url="${base_url}/target_groups"
     echo "[DEBUG] Fetching target groups from: $target_groups_url"
 
     # First CURL request to fetch the target groups
     response=$(curl -s -b "$cookie" "$target_groups_url")
-
+    # Removed verbose response debug
+    # echo "[DEBUG] Response from $target_groups_url: $response"
     # Check if the response is empty
     if [ -z "$response" ]; then
         echo "[ERROR] No response from $target_groups_url. Check the cookie or URL."
@@ -163,6 +146,8 @@ fetch_valid_targets() {
 
         # Second CURL request to fetch the detailed target information
         target_response=$(curl -s -b "$cookie" "$full_targets_url")
+        # Removed verbose response debug
+        # echo "[DEBUG] Response from $full_targets_url: $target_response"
 
         # Check if the target response is empty
         if [ -z "$target_response" ]; then
@@ -193,14 +178,10 @@ fetch_valid_targets() {
                 }
             }
         }'
-
-        # Save targets to the engagement folder
-        save_targets_in_folder "$temp_file" "$folder_name"
     else
         echo "[ERROR] No in-scope targets found for $base_url."
     fi
 }
-
 input_file="engagements.txt"
 temp_input_file="temp_input.txt" # Temporary file to store modified input
 
@@ -219,14 +200,11 @@ done < "$temp_input_file"
 # Convert content to lowercase and save it to the final output file
 cat "$temp_file" | tr '[:upper:]' '[:lower:]' > "$output_file"
 
-# Copy the scope file to the _ALL folder
-cp "$output_file" "_ALL/scope.txt"
-
 # Remove the temporary files
 rm "$temp_file" "$temp_input_file"
 
-# Clean up scope entries
-grep -E '(\*|([a-zA-Z0-9._%+-]+\.[a-zA-Z]{2,})|https?://|[0-9]{1,3}(\.[0-9]{1,3}){3})' scope.txt | grep -Ev '(apple\.com|google\.com)' > cleaned_valid_targets.txt
+
+grep -E '(\*|([a-zA-Z0-9._%+-]+\.[a-zA-Z]{2,})|https?://|[0-9]{1,3}(\.[0-9]{1,3}){3})' scope.txt | grep -Ev '(apple\.com|google\.com|*\.js)' > cleaned_valid_targets.txt
 
 rm scope.txt
 
@@ -236,18 +214,13 @@ sed 's#/$##' scope.txt > cleaned_tmp.txt
 
 sed 's/ //g' cleaned_tmp.txt > vdp_nonengagement_inscope.txt
 
-sed 's#http(s)://##g' vdp_nonengagement_inscope.txt > output_file.txt
-cat output_file.txt | sort -u > bugcrowd_inscope.txt
+sed 's#http(s)://##g' vdp_nonengagement_inscope.txt  > output_file.txt; cat output_file.txt | sort -u > bugcrowd_inscope.txt
 
 sed 's/^\*\([^\.]\)/*.\1/' bugcrowd_inscope.txt > bgtmp.tmp
 
-rm bugcrowd_inscope.txt
-mv bgtmp.tmp bugcrowd_inscope.txt
-rm cleaned_valid_targets.txt
-rm cleaned_tmp.txt
-rm output_file.txt
-rm scope.txt
-rm vdp_nonengagement_inscope.txt
+
+rm bugcrowd_inscope.txt ; mv bgtmp.tmp bugcrowd_inscope.txt ; rm cleaned_valid_targets.txt; rm cleaned_tmp.txt; rm output_file.txt; rm scope.txt; rm vdp_nonengagement_inscope.txt
+
 
 # Define input and output files
 input_file="bugcrowd_inscope.txt"
@@ -259,16 +232,13 @@ if [ ! -s "$input_file" ]; then
     exit 1
 fi
 
-# Display the input file content for debugging
-echo "Input file content:"
-cat "$input_file"
+clear
 
 # Extract IP addresses and specific IP range entries, saving them to inscope_ips.txt
 grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]+|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|:.*and.*' "$input_file" > "$ips_file"
 
 mv bugcrowd_inscope.txt inscope.tmp
 
-# Clean up specific patterns from the in-scope data
 sed -e 's/(readbelowfordetails)//g' \
     -e 's/\/\*//g' \
     -e 's/(dnsservice;dnsrelated)//g' \
@@ -276,8 +246,20 @@ sed -e 's/(readbelowfordetails)//g' \
     -e 's/\\t//g' \
     -e 's/\/.*//g' inscope.tmp > pre.txt
 
-# Sort and remove duplicates
 sort -u pre.txt > scope.txt
 
-echo "Scan complete."
+rm pre.txt inscope.tmp;
+
+
+printf "${RED}"
+printf " (                                                              \r\n"
+printf " )\ )                                      (         )          \r\n"
+printf "(()/(        )                   )         )\  (  ( /(  (       \r\n"
+printf " /(_)) (  ( /(  (       (  (    (      ) ((_)))\ )\())))\       \r\n"
+printf "(_))   )\ )(_)) )\ )    )\ )\   )\  '/(/(  _ /((_|_))//((_)     \r\n"
+printf "/ __| ((_|(_)_ _(_/(   ((_|(_)_((_))((_)_\| (_)) | |_(_))       \r\n"
+printf "\__ \/ _|/ _  | ' \)) / _/ _ \    \()  _ \) / -_)|  _/ -_)_     \r\n"
+printf "|___/\__|\__,_|_||_|  \__\___/_|_|_|| .__/|_\___| \__\___(_)    \r\n"
+printf "                                    |_|                         \r\n"
+printf "                                           ${RESET}"
 
