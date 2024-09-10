@@ -40,7 +40,7 @@ The script requires a session cookie from Bugcrowd for authentication. Choose be
 ```
 
 ## Steps
-Run the script with the appropriate flag (-vdp or -bbp).
+Run the script and select the type of program. 1 for BBP or 2 for VDP.
 Enter the session cookie when prompted for authentication.
 The script extracts engagement URLs and in-scope targets, saving results in the following files:
 engagements.txt: Extracted URLs of Bugcrowd engagements.
