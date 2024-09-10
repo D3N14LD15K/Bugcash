@@ -42,6 +42,7 @@ The script requires a session cookie from Bugcrowd for authentication. Choose be
 ```
 
 ## Steps
+Change the script permissions to execute: chmod +x
 Run the script and select the type of program. 1 for BBP or 2 for VDP.
 Enter the session cookie when prompted for authentication.
 The script extracts engagement URLs and in-scope targets.
