@@ -42,12 +42,11 @@ The script requires a session cookie from Bugcrowd for authentication. Choose be
 ## Steps
 Run the script and select the type of program. 1 for BBP or 2 for VDP.
 Enter the session cookie when prompted for authentication.
-The script extracts engagement URLs and in-scope targets, saving results in the following files:
-engagements.txt: Extracted URLs of Bugcrowd engagements.
-scope.txt: Cleaned list of in-scope targets and valid domains.
+The script extracts engagement URLs and in-scope targets.
 
 ## Output files
 engagements.txt: Contains a list of extracted engagement URLs.
+
 scope.txt: Final list of valid in-scope targets (domains, IP addresses).
 
 ## Debugging
