@@ -43,21 +43,23 @@ The script requires a session cookie from Bugcrowd for authentication. Choose be
 
 ## Steps
 Change the script permissions to execute: chmod +x
+
 Run the script and select the type of program. 1 for BBP or 2 for VDP.
+
 Enter the session cookie when prompted for authentication.
+
 The script extracts engagement URLs and in-scope targets.
 
+
+
 ## Output files
+
 engagements.txt: Contains a list of extracted engagement URLs.
 
 scope.txt: Final list of valid in-scope targets (domains, IP addresses).
 
 ## Debugging
 Debug messages are displayed during execution to help track script progress, such as URLs being processed and extracted targets. This information is useful for troubleshooting if the script doesn't perform as expected.
-
-## Error handling
-The script checks for valid JSON responses from Bugcrowd’s API.
-Handles empty or incorrect API responses gracefully, notifying the user when engagements or targets are not found.
 
 ## Disclaimer
 Use this script responsibly within the terms of Bugcrowd's platform. Ensure that you have permission to access the engagements and that your activities comply with safe harbor policies.
